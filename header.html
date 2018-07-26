@@ -22,8 +22,22 @@
             text-align: center;
         }
 
-        #edit img {
+        #display {
+            width: 80%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+        }
+
+        #display img {
             max-width: 100%;
+        }
+
+        #buttons {
+            width: 20%;
+            height: 100%;
+            position: absolute;
+            right: 0;
         }
 
         #main {
@@ -33,22 +47,7 @@
             height: 100%;
         }
 
-        #sub img {
-            width: auto;
-            height: 100%;
-        }
-
-        #ok {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-        }
-
-        #cancel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-        }
+        #main img {}
 
         #sub {
             position: absolute;
@@ -59,7 +58,6 @@
 
         #sub img {
             width: auto;
-            height: 100%;
         }
 
         nav {
@@ -88,13 +86,43 @@
     </style>
 </head>
 <nav>
-    <button id="speed">
+    <button id="speed" data-method="speed">
         <var style="display:none;">10</var>
         <span>x1</span>
     </button>
+
+    <button data-method="copy" data-option="l2r">
+        copy left to right
+    </button>
+
+    <button data-method="copy" data-option="r2l">
+        copy right to left
+    </button>
+
+    <button data-method="save">
+        save
+    </button>
 </nav>
 <article id="edit">
-    <img>
-    <button id="ok">OK</button>
-    <button id="cancel">Cancel</button>
+    <div id="display">
+        <img>
+    </div>
+    <div id="buttons">
+        <div class="btn-group">
+            <button data-method="rotate" data-option="-45">rotate left 45</button>
+            <button data-method="rotate" data-option="45">rotate right 45</button>
+        </div>
+        <div class="btn-group">
+            <button data-method="rotate" data-option="-15">rotate left 15</button>
+            <button data-method="rotate" data-option="15">rotate right 15</button>
+        </div>
+        <div class="btn-group">
+            <button data-method="rotate" data-option="-1">rotate left 1</button>
+            <button data-method="rotate" data-option="1">rotate right 1</button>
+        </div>
+        <div class="btn-group">
+            <button data-method="submit">submit</button>
+            <button data-method="destroy">destroy</button>
+        </div>
+    </div>
 </article>

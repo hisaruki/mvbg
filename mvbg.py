@@ -4,6 +4,7 @@ import time
 import tempfile
 import webbrowser
 import argparse
+import re
 from mimetypes import guess_type
 from pathlib import Path
 from base64 import encodestring
@@ -24,7 +25,7 @@ def add_script(path, tag='script'):
     return html
 
 def as_data_uri(p):
-    m, e = guess_type(p.name)
+    m, e = guess_type(re.sub(':.*', '', p.name))
     bin = p.read_bytes()
     src = 'data:'
     src += m
@@ -36,10 +37,10 @@ if fp.exists():
     with tempfile.TemporaryDirectory() as tf:
         src = as_data_uri(fp).replace('\n', '')
 
-        html += '<article id="main"></article>'
-        html += '<article id="sub"></article>'
+        html += '<article id="main"><img src="'+src+'"></article>'
+        html += '<article id="sub"><img src="'+src+'"></article>'
         html += '<script>'
-        html += 'var src = "' +src+ '";'
+        html += 'var filename = "' +fp.name+ '";'
         html += '</script>'
         html += add_script('jquery-3.3.1.slim.min.js')
         html += add_script('cropper.min.js')
