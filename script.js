@@ -37,20 +37,20 @@
     }
     move();
 
-    var change_speed = function(mode){
-        if(mode == "button"){
+    var change_speed = function (mode) {
+        if (mode == "button") {
             speed = speed / 2;
             if (speed > 1) {
                 speed = Math.ceil(speed);
             } else {
                 speed = 40;
             }
-        }else{
-            if(mode > 0){
+        } else {
+            if (mode > 0) {
                 speed = Math.ceil(speed / 2);
-            }else{
+            } else {
                 speed = Math.ceil(speed * 2);
-                if(speed > 40){
+                if (speed > 40) {
                     speed = 40;
                 }
             }
@@ -61,18 +61,54 @@
     }
 
     var c = null;
+    $("button.toggle").on("click", function () {
+        $(this).toggleClass("active");
+    });
+
     $("#main img, #sub img").on("dblclick", function () {
         $("#edit").attr("data-editing", $(this).parent().attr("id"));
         var im = $('#edit img')
         im.attr("src", $(this).attr("src"));
         $("#edit").show();
+        var aspectRatio = null;
+        if (!$("[data-method=aspectratio]").hasClass("active")) {
+            aspectRatio = 16 / 9
+        }
         c = im.cropper({
+            "aspectRatio": aspectRatio,
             "toggleDragModeOnDblclick": true,
             "viewMode": 1,
             "autoCropArea": 0.95
         });
     });
 
+
+    var mkpallete = function (ib) {
+        ib.on("mouseup", function (e) {
+            if (e.which == 2) {
+                $(this).remove();
+            } else {
+                var target = '#main img';
+                if (e.which == 3) {
+                    target = '#sub img';
+                }
+                var src = $(this).find("img").attr("src");
+                $(target).attr("src", src);
+            }
+            resize();
+        }).on("contextmenu", function () {
+            return false;
+        });
+        $("nav").append(ib);
+    }
+
+    $("#main img").attr("src", images[0]);
+    $("#sub img").attr("src", images[0]);
+    for(i=0;i<images.length;i++){
+        var img = images[i];
+        var ib = $('<button><img src=' + img + '></button>');
+        mkpallete(ib);
+    }
 
     $("button").on("click", function () {
         var method = $(this).attr("data-method")
@@ -84,11 +120,12 @@
 
         if (method == "submit") {
             var src = c.cropper('getCroppedCanvas').toDataURL('image/png');
-            var target = $("#edit").attr("data-editing");
-            $('img', '#' + target).attr("src", src);
+            //var target = $("#edit").attr("data-editing");
+            //$('img', '#' + target).attr("src", src);
+            var ib = $('<button><img src=' + src + '></button>');
+            mkpallete(ib);
             c.cropper('destroy');
             $("#edit").hide();
-            resize();
         }
 
         if (method == "rotate") {
@@ -118,6 +155,7 @@
             link.download = filename + ".html";
             link.click();
         }
+        resize();
     });
 
     $(document).on("keypress", function (e) {
@@ -162,5 +200,6 @@
 
 
     });
+    resize();
 
 })();

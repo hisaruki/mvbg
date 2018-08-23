@@ -10,9 +10,8 @@ from pathlib import Path
 from base64 import encodestring
 
 parser = argparse.ArgumentParser(description="mvbg")
-parser.add_argument("path")
+parser.add_argument("path", nargs="*")
 args = parser.parse_args()
-fp = Path(args.path).resolve()
 
 html = (Path(__file__).resolve().parent / Path("header.html")).read_text()
 
@@ -33,23 +32,26 @@ def as_data_uri(p):
     src += encodestring(bin).decode("utf-8")
     return src
 
-if fp.exists():
-    with tempfile.TemporaryDirectory() as tf:
+with tempfile.TemporaryDirectory() as tf:
+    html += '<article id="main"><img></article>'
+    html += '<article id="sub"><img></article>'
+    html += '<script>'
+    html += 'var images = ['
+    for fp in args.path:
+        fp = Path(fp).resolve()
         src = as_data_uri(fp).replace('\n', '')
-
-        html += '<article id="main"><img src="'+src+'"></article>'
-        html += '<article id="sub"><img src="'+src+'"></article>'
-        html += '<script>'
-        html += 'var filename = "' +fp.name+ '";'
-        html += '</script>'
-        html += add_script('jquery-3.3.1.slim.min.js')
-        html += add_script('cropper.min.js')
-        html += add_script('cropper.min.css', 'style')
-        html += add_script('jquery-cropper.min.js')
-        html += add_script('script.js')
-        html += '</body>'
-        html += '</html>'
-        url = Path(str(tf)) / Path("index.html")
-        url.write_text(html)
-        webbrowser.open(url.as_uri())
-        time.sleep(1)
+        html += '"' + src + '",'
+    html += '];'
+    html += 'var filename = "' +fp.name+ '";\n'
+    html += '</script>'
+    html += add_script('jquery-3.3.1.slim.min.js')
+    html += add_script('cropper.min.js')
+    html += add_script('cropper.min.css', 'style')
+    html += add_script('jquery-cropper.min.js')
+    html += add_script('script.js')
+    html += '</body>'
+    html += '</html>'
+    url = Path(str(tf)) / Path("index.html")
+    url.write_text(html)
+    webbrowser.open(url.as_uri())
+    time.sleep(1)
