@@ -33,8 +33,8 @@ def as_data_uri(p):
     return src
 
 with tempfile.TemporaryDirectory() as tf:
-    html += '<article id="main"><img></article>'
-    html += '<article id="sub"><img></article>'
+    html += '<article id="main"></article>'
+    html += '<article id="sub"></article>'
     html += '<script>'
     html += 'var images = ['
     for fp in args.path:

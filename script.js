@@ -1,7 +1,7 @@
 (function () {
     var resize = function () {
         $("#sub img").css("height", $(window).height() + "px");
-        var mw = $(window).width() - $("#sub img").width();
+        var mw = $(window).width() - $("#sub")[0].offsetWidth;
         mw = Math.ceil(mw);
         $("#main img").width(mw);
     }
@@ -23,11 +23,13 @@
                 x = $("#main").css("top");
                 x = x.replace("px", "") - 0
 
+                var imgHeight = $("#main")[0].scrollHeight;
+
                 if (x > 0) {
-                    x = $("#main img").height() * -1 + $(window).height();
+                    x = imgHeight * -1 + $(window).height();
                     x = Math.ceil(x);
                 }
-                if (x < ($("#main img").height() - $(window).height()) * -1) {
+                if (x < (imgHeight - $(window).height()) * -1) {
                     x = 0;
                 }
 
@@ -65,49 +67,97 @@
         $(this).toggleClass("active");
     });
 
-    $("#main img, #sub img").on("dblclick", function () {
-        $("#edit").attr("data-editing", $(this).parent().attr("id"));
-        var im = $('#edit img')
-        im.attr("src", $(this).attr("src"));
-        $("#edit").show();
-        var aspectRatio = null;
-        if (!$("[data-method=aspectratio]").hasClass("active")) {
-            aspectRatio = 16 / 9
-        }
-        c = im.cropper({
-            "aspectRatio": aspectRatio,
-            "toggleDragModeOnDblclick": true,
-            "viewMode": 1,
-            "autoCropArea": 0.95
+    var mkedit = function(img){
+        img.on("dblclick", function () {
+            $("#edit").attr("data-editing", $(this).parent().attr("id"));
+            var im = $('#edit img')
+            im.attr("src", $(this).attr("src"));
+            $("#edit").show();
+            var aspectRatio = null;
+            if (!$("[data-method=aspectratio]").hasClass("active")) {
+                aspectRatio = 16 / 9
+            }
+            c = im.cropper({
+                "aspectRatio": aspectRatio,
+                "toggleDragModeOnDblclick": true,
+                "viewMode": 1,
+                "autoCropArea": 0.95
+            });
         });
-    });
-
+        return img;
+    }
 
     var mkpallete = function (ib) {
         ib.on("mouseup", function (e) {
             if (e.which == 2) {
                 $(this).remove();
             } else {
-                var target = '#main img';
+                var target = '#main';
                 if (e.which == 3) {
-                    target = '#sub img';
+                    target = '#sub';
                 }
                 var src = $(this).find("img").attr("src");
-                $(target).attr("src", src);
+                var img = $('<img>');
+                img.attr("src", src);
+                if (!e.ctrlKey) {
+                    $(target).empty();
+                }
+                img = mkedit(img);
+                $(target).append(img);
             }
             resize();
         }).on("contextmenu", function () {
             return false;
         });
+        return ib;
+    }
+
+    if ($("nav img").length > 0) {
+        images = Array();
+        $("nav img").each(function () {
+            images.push($(this).attr("src"));
+        });
+        $("nav img").remove();
+    } else {
+        images.forEach(function(image){
+            var img = $('<img>');
+            img.attr("src", image);
+            $("#main").append(img);
+            img = mkedit(img);
+            var img = $('<img>');
+            img.attr("src", image);
+            img = mkedit(img);
+            $("#sub").append(img);
+        });
+    }
+
+    for (i = 0; i < images.length; i++) {
+        var src = images[i];
+        var ib = $('<button><img src=' + src + '></button>');
+        ib = mkpallete(ib);
         $("nav").append(ib);
     }
 
-    $("#main img").attr("src", images[0]);
-    $("#sub img").attr("src", images[0]);
-    for(i=0;i<images.length;i++){
-        var img = images[i];
-        var ib = $('<button><img src=' + img + '></button>');
-        mkpallete(ib);
+
+    var moveTo = function (i, target) {
+        if ($("#main img").length - 1 >= i) {
+            var y = 0;
+            var j = 0;
+            $("#main img").each(function(){
+                if(j < i){
+                    y += $(this).height();
+                }
+                j++;
+            });
+            if(!target){
+                y += $("#main img").eq(i).height();
+                y -= $(window).height();
+            }
+            y *= -1;
+            console.log(i, target, y);
+            $("#main").css("top", y);
+        }
+
     }
 
     $("button").on("click", function () {
@@ -123,7 +173,8 @@
             //var target = $("#edit").attr("data-editing");
             //$('img', '#' + target).attr("src", src);
             var ib = $('<button><img src=' + src + '></button>');
-            mkpallete(ib);
+            ib = mkpallete(ib);
+            $("nav").append(ib);
             c.cropper('destroy');
             $("#edit").hide();
         }
@@ -185,18 +236,26 @@
         }
         //j
         if (e.which == 106) {
-            $("#main").css("top", 0);
         }
         //k
         if (e.which == 107) {
-            $("#main").css("top", ($("#main img").height() - $(window).height()) * -1);
         }
         //h
         if (e.which == 104) {
+            $("#main").css("top", 0);
         }
+
         //l
         if (e.which == 108) {
+            var i = $("#main img").length - 1;
+            moveTo(i, false);
         }
+        //1-9
+        if (49 <= e.which && e.which <= 57) {
+            var i = e.which - 49;
+            moveTo(i, true);
+        }
+
 
 
     });
