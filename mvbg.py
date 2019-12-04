@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 import time
 import tempfile
-import webbrowser
 import argparse
 import re
+import webbrowser
 from mimetypes import guess_type
 from pathlib import Path
-from base64 import encodestring
+from base64 import encodebytes
+from subprocess import Popen
 
 parser = argparse.ArgumentParser(description="mvbg")
 parser.add_argument("path", nargs="*")
@@ -25,11 +26,12 @@ def add_script(path, tag='script'):
 
 def as_data_uri(p):
     m, e = guess_type(re.sub(':.*', '', p.name))
+    print(m, e)
     bin = p.read_bytes()
     src = 'data:'
     src += m
     src += ';base64,'
-    src += encodestring(bin).decode("utf-8")
+    src += encodebytes(bin).decode("utf-8")
     return src
 
 with tempfile.TemporaryDirectory() as tf:
@@ -53,5 +55,11 @@ with tempfile.TemporaryDirectory() as tf:
     html += '</html>'
     url = Path(str(tf)) / Path("index.html")
     url.write_text(html)
+    """
+    Popen([
+        "google-chrome-stable",
+        url.as_uri()
+    ])
+    """
     webbrowser.open(url.as_uri())
     time.sleep(1)

@@ -9,6 +9,7 @@
     $(window).on("resize load", function () {
         resize();
     });
+    $("title").text(filename);
 
     var speed = 10;
     var slideshow = -1;
@@ -117,7 +118,7 @@
         $("nav img").each(function () {
             images.push($(this).attr("src"));
         });
-        $("nav img").remove();
+        $("nav img").parent("button").remove();
     } else {
         images.forEach(function(image){
             var img = $('<img>');
