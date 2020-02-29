@@ -11,7 +11,7 @@
     });
     $("title").text(filename);
 
-    var speed = 10;
+    var speed = 1;
     var slideshow = -1;
     var go = 1;
     var moving = null;
@@ -76,7 +76,7 @@
             $("#edit").show();
             var aspectRatio = null;
             if (!$("[data-method=aspectratio]").hasClass("active")) {
-                aspectRatio = 16 / 9
+                aspectRatio = $("#main").width() / $(window).height();
             }
             c = im.cropper({
                 "aspectRatio": aspectRatio,
@@ -84,6 +84,10 @@
                 "viewMode": 1,
                 "autoCropArea": 0.95
             });
+        }).on("mouseup", function (e) {
+            if (e.which == 2) {
+                $(this).remove();
+            }
         });
         return img;
     }
@@ -186,17 +190,6 @@
                 $(this).attr("data-option")
             );
         }
-
-        if (method == "copy") {
-            var option = $(this).attr("data-option");
-            if (option == "l2r") {
-                $("#sub img").attr("src", $("#main img").attr("src"));
-            } else {
-                $("#main img").attr("src", $("#sub img").attr("src"));
-            }
-            resize();
-        }
-
 
         if (method == "speed") {
             change_speed("button");
