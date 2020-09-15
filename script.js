@@ -113,6 +113,9 @@
             resize();
         }).on("contextmenu", function () {
             return false;
+        }).on("dblclick", function(){
+            var src = $(this).find("img").attr("src");
+            $("body").css("background-image", 'url("'+ src + '")');
         });
         return ib;
     }
@@ -164,6 +167,23 @@
         }
 
     }
+
+    FileList.prototype.map = Array.prototype.map
+    let uploader = $('<input id="upload" type="file" multiple="multiple">').hide().on("change", function(){
+        this.files.map(function(file){
+            let reader = new FileReader();
+            reader.onload = function () {
+                var ib = $('<button><img src=' + reader.result + '></button>');
+                ib = mkpallete(ib);
+                $("nav").append(ib);
+            }
+            reader.readAsDataURL(file);
+
+        });
+    });
+    let b = $("<label>").attr("for", "upload").html("file").append(uploader);
+    $("nav").prepend(b);
+
 
     $("button").on("click", function () {
         var method = $(this).attr("data-method")
@@ -238,12 +258,12 @@
         if (e.which == 104) {
             $("#main").css("top", 0);
         }
-
         //l
         if (e.which == 108) {
             var i = $("#main img").length - 1;
             moveTo(i, false);
         }
+
         //1-9
         if (49 <= e.which && e.which <= 57) {
             var i = e.which - 49;

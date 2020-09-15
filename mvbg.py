@@ -13,7 +13,7 @@ from subprocess import Popen
 import os
 
 parser = argparse.ArgumentParser(description="mvbg")
-parser.add_argument("path", nargs="*")
+parser.add_argument("paths", nargs="*")
 args = parser.parse_args()
 
 html = (Path(__file__).resolve().parent / Path("header.html")).read_text()
@@ -26,15 +26,16 @@ def add_script(path, tag='script'):
     html += '</' + tag + '>'
     return html
 
-def as_data_uri(p):
-    m, e = guess_type(re.sub(':.*', '', p.name))
-    print(m, e)
-    bin = p.read_bytes()
-    src = 'data:'
-    src += m
-    src += ';base64,'
-    src += encodebytes(bin).decode("utf-8")
-    return src
+def as_data_uri(self):
+    m, _ = guess_type(re.sub(':.*', '', self.name))
+    bin = self.read_bytes()
+    if m:
+        src = 'data:'
+        src += m
+        src += ';base64,'
+        src += encodebytes(bin).decode("utf-8")
+        return src
+Path.as_data_uri = as_data_uri
 
 with tempfile.TemporaryDirectory() as tf:
     html += '<article id="main"></article>'
@@ -42,10 +43,20 @@ with tempfile.TemporaryDirectory() as tf:
     html += '<article id="sub"></article>'
     html += '<script>'
     html += 'var images = ['
-    for fp in args.path:
-        fp = Path(fp).resolve()
-        src = as_data_uri(fp).replace('\n', '')
-        html += '"' + src + '",'
+    paths = []
+    for fp in filter(lambda x: not re.search('\*', x), args.paths):
+        paths.append(Path(fp).resolve())
+    
+    for wc in filter(lambda x:re.search('\*', x), args.paths):
+        wc = Path(wc)
+        for fp in wc.parent.glob(wc.name):
+            paths.append(Path(fp).resolve())
+
+    for fp in paths:
+        src = fp.as_data_uri()
+        if not src:
+            continue
+        html += '"' + src.replace('\n', '') + '",'
     html += '];'
     html += 'var filename = "' +fp.name+ '";\n'
     html += '</script>'
